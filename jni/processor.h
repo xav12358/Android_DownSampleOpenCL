@@ -2,6 +2,7 @@
 #define __JNI_H__
 #ifdef __cplusplus
 
+#include <jni.h>
 #include <android/bitmap.h>
 #include <android/log.h>
 
@@ -12,38 +13,17 @@
 extern "C" {
 #endif
 
-//#define DECLARE_NOPARAMS(returnType,fullClassName,func) \
-//JNIEXPORT returnType JNICALL Java_##fullClassName##_##func(JNIEnv *env, jclass clazz);
-//
-//#define DECLARE_WITHPARAMS(returnType,fullClassName,func,...) \
-//JNIEXPORT returnType JNICALL Java_##fullClassName##_##func(JNIEnv *env, jclass clazz,__VA_ARGS__);
-//
-//DECLARE_NOPARAMS(jboolean,com_example_LiveFeatureActivity,compileKernels)
-//
-//DECLARE_WITHPARAMS(void,com_example_CameraPreview,runfilter,jobject outBmp, jbyteArray inData, jint width, jint height, jint choice)
-
-JNIEXPORT jboolean JNICALL Java_com_example_LiveFeatureActivity_compileKernels(JNIEnv *env, jclass clazz);
-
-JNIEXPORT void JNICALL Java_com_example_CameraPreview_runfilter(
-        JNIEnv *env,
-        jclass clazz,
-        jobject outBmp,
-        jbyteArray inData,
-        jint width,
-        jint height,
-        jint choice);
-
-
-JNIEXPORT jboolean JNICALL compileKernels(JNIEnv *env, jclass clazz);
-
+JNIEXPORT jint JNICALL getSpeed(JNIEnv *env, jclass clazz);
+JNIEXPORT jboolean JNICALL compileKernels(JNIEnv *env, jclass clazz, int w,int h);
 JNIEXPORT void JNICALL runfilter(
-        JNIEnv *env,
-        jclass clazz,
-        jobject outBmp,
-        jbyteArray inData,
-        jint width,
-        jint height,
-        jint choice);
+		JNIEnv *env,
+		jclass clazz,
+		jobject L1Bmp,
+		jobject L2Bmp,
+		jobject L3Bmp,
+		jbyteArray inData,
+		jint width,
+		jint height);
 
 #ifdef __cplusplus
 }
