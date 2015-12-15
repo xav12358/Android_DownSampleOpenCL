@@ -18,40 +18,29 @@ uchar convertYVUtoRGBA(int y, int u, int v)
 __kernel void nv21togray( __global uchar* out,
                           __global uchar*  in,
                           int    im_width,
-                          int    im_height)
+                          int    im_height,
+                          int 	 im_offset)
 {
-    __local uchar uvShrd[DSHRD_SIZE];
-    int gx	= get_global_id(0);
+	const sampler_t sampler = CLK_NORMALIZED_COORDS_FALSE | CLK_ADDRESS_CLAMP | CLK_FILTER_NEAREST;    int gx	= get_global_id(0);
     int gy	= get_global_id(1);
-    int lx  = get_local_id(0);
-    int ly  = get_local_id(1);
-    int off = im_width*im_height
-    // every thread whose
-    // both x,y indices are divisible
-    // by 2 move the u,v corresponding
-    // to the 2x2 block into shared mem
+    
     int inIdx= gy*im_width+gx;
-    int uvIdx= off + (gy/2)*im_width + (gx & ~1);
-    int shlx = lx/2;
-    int shly = ly/2;
-    int shIdx= 2*(shlx+shly*DSHRD_LEN);
-    if( gx%2==0 && gy%2==0 ) {
-        uvShrd[shIdx+0] = in[uvIdx+0];
-        uvShrd[shIdx+1] = in[uvIdx+1];
-    }
+    int uvIdx= im_offset + (gy/2)*im_width + (gx & ~1);
+    int shlx = gx/2;
+    int shly = gy/2;
+    int shIdx= im_offset+(shlx+shly*im_width);
+    
     // do some work while others copy
     // uv to shared memory
-    int y   = (0xFF & ((int)in[inIdx]));
-    if( y < 16 ) y=16;
-    barrier(CLK_LOCAL_MEM_FENCE);
-    // return invalid threads
+    int y   =  (int)in[inIdx];
+    
     if( gx >= im_width || gy >= im_height )
         return;
     // convert color space
-    int v   = (0xFF & ((int)uvShrd[shIdx+0]));
-    int u   = (0xFF & ((int)uvShrd[shIdx+1]));
+    int v   = ((int)in[shIdx+0]);
+    int u   = ((int)in[shIdx+1]);
     // write output to image
-    out[inIdx]  = convertYVUtoRGBA(y,u,v);
+    out[inIdx]  = 255-(0.403936*(u-128)+0.838316*(v-128)+(y-16));
 }
 
 
@@ -104,3 +93,6 @@ __kernel void downfilter_y_g(
     }
  
 }
+
+
+
